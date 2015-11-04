@@ -29,23 +29,48 @@ fs.readFile(pathToList, 'utf8', function (err, data) {
     console.log('Error found: ', err);
   }
   currentTodos = JSON.parse(data);
-
+  
   // Loop through the args and apply appropriate rules 
 
   switch(args[0]) {
     case 'ls':
-      console.log('Here is your todo list: ', currentTodos)
+      console.log('Here is your todo list: ');
+      for (var i = 0; i < currentTodos.todos.length; i++) {
+        console.log(i+1 + ": " + currentTodos.todos[i].name);
+      }
       break;
-    case 'commit':
-      console.log('Starting a commit')
-      currentTodos.todos.push({todos: args[1]})
-      console.log('Updated Todo List: ', currentTodos)
+
+    // If 'add' command is typed, expect a string argument to follow
+    case 'add':
+      if (!args[1]) {
+        console.log('Please include a string describing the todo after the "add" command');
+        break
+      }
+      console.log('Adding a new todo item...')
+      currentTodos.todos.push({name: args[1]});
+      console.log('Updated Todo List: ', currentTodos);
       fs.writeFile(pathToList, JSON.stringify(currentTodos), function(err) {
         if (err) {
           return console.log('Write fail: ', err);
-        }
+        } 
         console.log('Write successful!');
       })
+      break;
+
+    // If 'fin' command is typed, expect a number argument to follow
+    case 'fin':
+      if (!args[1]) {
+        console.log('Please include a number corresponding to the todo item to finish');
+        break
+      }
+      console.log('Finishing item ' + args[1] + ": " + currentTodos.todos[args[1]-1].name);
+      currentTodos.todos.splice(args[1]-1, 1);
+       fs.writeFile(pathToList, JSON.stringify(currentTodos), function(err) {
+        if (err) {
+          return console.log('Write fail: ', err);
+        } 
+        console.log('Updated Todo List: ', currentTodos);
+        })
       break;
   }
 })
